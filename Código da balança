@@ -1,0 +1,123 @@
+#include <SoftwareSerial.h>
+#include  <LiquidCrystal.h>
+
+#define btnModo 6 
+#define btnPesoPeca 5 
+
+int balanca;
+int peso;
+int pesoPeca;
+int qtdPeca;
+int modo;
+int confirmaPesoPeca;
+
+LiquidCrystal  lcd  (7, 8, 9, 10, 11, 12); 
+
+void setup()
+{
+  
+  pinMode(btnModo, INPUT);
+  pinMode(btnPesoPeca, INPUT);
+  confirmaPesoPeca = 0; //0-false 1-true
+  modo = 1; //1-Pesagem, 2-Contagem
+  lcd.begin(16, 2);        
+  lcd.setCursor(0, 0);  
+  Serial.begin(9600); 
+  inicio();  
+}
+ 
+void loop(){
+  
+  balanca=analogRead(0);
+  peso = map(balanca, 0, 914, 0, 1000);   
+  
+  if(digitalRead(btnModo) == HIGH)
+  {
+    if(modo == 1)
+    {
+		modo = 2;
+      	delay(200);
+      	lcd.clear();
+    }
+    else
+    {
+		modo = 1;
+      	delay(200);
+      	lcd.clear();
+    }
+  }
+  
+  
+  if(modo == 1)
+  {
+  	pesagem();
+  }
+  else
+  {
+  	contagem();
+  }  
+}
+
+void pesagem()
+{
+  lcd.setCursor(0, 0);             
+  lcd.print ("Modo 1 - Pesagem");
+  lcd.setCursor(0, 1);             
+  lcd.print ("Peso: ");
+  lcd.print (peso);  
+  lcd.print ("g");
+}
+
+void contagem()
+{	
+  if(digitalRead(btnPesoPeca) == HIGH)
+  {
+    if(confirmaPesoPeca == 0)
+    {
+		confirmaPesoPeca = 1;
+      	pesoPeca = peso;
+      	delay(200);
+      	lcd.clear();
+    }    
+  }  
+  
+  if(confirmaPesoPeca == 1)
+  {
+    
+    qtdPeca = peso / pesoPeca;
+    
+    lcd.setCursor(0, 0);             
+  	lcd.print ("Modo 2 - Contagem");
+  	lcd.setCursor(0, 1);             
+    lcd.print ("QTD Pecas: ");
+    lcd.print (qtdPeca);
+    lcd.print ("pcs");
+    
+  }
+  else
+  {
+    lcd.setCursor(0, 0);             
+  	lcd.print ("Modo 2 - Contagem");
+  	lcd.setCursor(0, 1);             
+    lcd.print ("Peso 1pc: ");
+    lcd.print (peso);  
+    lcd.print ("g");
+  }
+}
+
+void inicio()
+{
+  for (int i = 5; i>=0; i--)
+  {
+    lcd.setCursor(0, 0);
+    lcd.print ("Calibrando...");
+    lcd.setCursor(8, 1);
+    lcd.print (i);
+    delay(1000);
+    lcd.clear();
+  }
+}
+
+
+
+
